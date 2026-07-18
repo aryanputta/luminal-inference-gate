@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -27,14 +28,40 @@ def _pct(candidate: float, baseline: float) -> float:
     return (candidate - baseline) / baseline * 100.0
 
 
+def _index_results(report: dict[str, Any], label: str) -> dict[str, dict[str, Any]]:
+    """Validate report rows before comparison; never silently discard evidence."""
+    hardware = report.get("hardware", {})
+    if not hardware.get("device_name") or not report.get("timestamp"):
+        raise ValueError(f"{label} report is missing hardware identity or timestamp")
+    rows = report.get("results", [])
+    if not rows:
+        raise ValueError(f"{label} report has no benchmark results")
+    indexed: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        try:
+            key = f"{row['pattern']}/{row['size']}"
+            time_us = float(row["time_us"])
+            throughput = float(row["throughput_gbps"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(f"{label} report has an invalid benchmark row") from exc
+        if not key or not math.isfinite(time_us) or time_us <= 0 or not math.isfinite(throughput) or throughput < 0:
+            raise ValueError(f"{label} report has non-finite or non-positive metrics")
+        if key in indexed:
+            raise ValueError(f"{label} report contains duplicate benchmark key: {key}")
+        indexed[key] = row
+    return indexed
+
+
 def compare_reports(baseline: dict[str, Any], candidate: dict[str, Any], threshold_pct: float = 5.0) -> dict[str, Any]:
     """Return a deterministic comparison and fail closed on incompatible runs."""
     base_hw = baseline.get("hardware", {})
     cand_hw = candidate.get("hardware", {})
     if base_hw.get("device_name") != cand_hw.get("device_name"):
         raise ValueError("baseline and candidate use different devices")
-    base = {f"{r['pattern']}/{r['size']}": r for r in baseline.get("results", [])}
-    cand = {f"{r['pattern']}/{r['size']}": r for r in candidate.get("results", [])}
+    if not math.isfinite(threshold_pct) or threshold_pct < 0:
+        raise ValueError("threshold must be a finite non-negative number")
+    base = _index_results(baseline, "baseline")
+    cand = _index_results(candidate, "candidate")
     missing = sorted(set(base) - set(cand))
     added = sorted(set(cand) - set(base))
     comparisons: list[Comparison] = []

@@ -28,3 +28,19 @@ def test_improvement_passes_and_reports_delta() -> None:
 def test_mismatched_hardware_fails_closed() -> None:
     with pytest.raises(ValueError, match="different devices"):
         compare_reports(report(), report(device="Other GPU"))
+
+
+def test_duplicate_benchmark_keys_fail_closed() -> None:
+    duplicate = report()
+    duplicate["results"].append(dict(duplicate["results"][0]))
+    with pytest.raises(ValueError, match="duplicate benchmark key"):
+        compare_reports(duplicate, report())
+
+
+def test_empty_report_and_invalid_threshold_fail_closed() -> None:
+    empty = report()
+    empty["results"] = []
+    with pytest.raises(ValueError, match="no benchmark results"):
+        compare_reports(empty, report())
+    with pytest.raises(ValueError, match="non-negative"):
+        compare_reports(report(), report(), threshold_pct=-1)

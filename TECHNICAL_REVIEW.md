@@ -71,3 +71,12 @@ performance gain until a real same-device baseline and candidate are produced.
 These are review comments, not claims that the current implementation has been
 approved by NVIDIA, Luminal, or any other maintainer. They are the smallest
 hardening items before treating arbitrary external reports as trusted CI input.
+
+## Review follow-up
+
+Implemented in `inference_gate.py` and covered by tests:
+
+- duplicate benchmark keys are rejected;
+- empty, missing, non-finite, and invalid metric rows fail closed;
+- missing hardware identity or timestamp fails closed;
+- negative or non-finite thresholds fail closed.
