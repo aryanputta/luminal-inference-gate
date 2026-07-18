@@ -35,4 +35,17 @@ The baseline must be a real `luminal_bench` artifact produced on the same device
 the gate refuses to compare different hardware. No benchmark numbers are included
 in this repository until they have been produced by the actual backend.
 
-Serve `viewer/` with `python -m http.server 8787 --directory viewer` after placing a report at `viewer/report.json`. The viewer is static and labels cached evidence clearly.
+## What this demonstrates
+
+The primary interface is the Python CLI and its JSON/Markdown output. The small
+`viewer/` directory is optional and only makes a saved report easy to inspect in
+a browser. It does not run code, collect data, or replace the benchmark gate.
+
+Run the tests locally:
+
+```bash
+python -m pytest -q
+```
+
+Every performance claim must come from a real `luminal_bench` report produced on
+the same device. This repository contains no invented benchmark results.
