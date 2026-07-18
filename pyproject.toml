@@ -1,0 +1,9 @@
+[project]
+name = "luminal-docguard"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["markdown-it-py>=3.0,<4"]
+
+[project.scripts]
+luminal-docguard = "docguard:main"
+luminal-inference-gate = "inference_gate:main"

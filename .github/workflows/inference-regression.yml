@@ -1,0 +1,28 @@
+name: Inference regression gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compare-benchmarks:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Luminal benchmark workload
+        run: |
+          cargo bench -p luminal_bench --features metal --bench patterns -- --noplot
+      - name: Check baseline exists
+        run: test -f baseline/bench_report.json
+      - name: Compare against baseline artifact
+        run: |
+          python companies/luminal/app/inference_gate.py baseline/bench_report.json target/criterion/pattern_report.json \
+            --threshold 5 --markdown-output inference-regression.md --json-output inference-regression.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inference-regression-report
+          path: inference-regression.*

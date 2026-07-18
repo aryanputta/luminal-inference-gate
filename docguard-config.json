@@ -1,0 +1,6 @@
+{
+  "executable": {
+    "docs/graphtensor.mdx:11": "The primary end-to-end GraphTensor guide example."
+  },
+  "ignored": {}
+}

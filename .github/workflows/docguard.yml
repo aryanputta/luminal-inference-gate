@@ -1,0 +1,22 @@
+name: Documentation conformance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  rust-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install markdown-it-py
+      - run: python companies/luminal/app/docguard.py --docs-root docs --repo-root . --config companies/luminal/app/docguard-config.json --output docguard-report.json --run
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: luminal-docguard-report
+          path: docguard-report.json
