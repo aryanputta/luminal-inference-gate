@@ -55,3 +55,19 @@ python3 inference_gate.py baseline/bench_report.json candidate/bench_report.json
 Review the comparator semantics, report schema assumptions, failure behavior,
 and provenance requirements. Do not treat the repository as proof of a
 performance gain until a real same-device baseline and candidate are produced.
+
+## Maintainer review comments
+
+1. **Reject duplicate benchmark keys.** The current dictionary construction
+   would silently overwrite two rows with the same `pattern/size` key. Add an
+   explicit duplicate check before comparison.
+2. **Fail closed on empty or incomplete reports.** Validate that both reports
+   contain timestamps, hardware identity, and at least one result with finite,
+   positive `time_us` and throughput values. An empty intersection currently
+   produces a misleading `passed` result.
+3. **Validate the threshold.** Reject negative or non-finite thresholds at the
+   CLI boundary.
+
+These are review comments, not claims that the current implementation has been
+approved by NVIDIA, Luminal, or any other maintainer. They are the smallest
+hardening items before treating arbitrary external reports as trusted CI input.
