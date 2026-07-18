@@ -37,9 +37,8 @@ in this repository until they have been produced by the actual backend.
 
 ## What this demonstrates
 
-The primary interface is the Python CLI and its JSON/Markdown output. The small
-`viewer/` directory is optional and only makes a saved report easy to inspect in
-a browser. It does not run code, collect data, or replace the benchmark gate.
+The primary interface is the Python CLI and its JSON/Markdown output. This
+repository intentionally contains no dashboard or custom HTML application.
 
 Run the tests locally:
 
